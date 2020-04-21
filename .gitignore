@@ -1,0 +1,12 @@
+
+*.json
+*.pdb
+*.dll
+*.exe
+*.csproj
+*.user
+*.cache
+*.props
+obj/Debug/netcoreapp3.0/ConnectFour.AssemblyInfo.cs
+*.targets
+obj/Debug/netcoreapp3.0/ConnectFour.csproj.FileListAbsolute.txt

@@ -12,27 +12,17 @@ namespace ConnectFour
         static void Main()
         {
 
-            Board brd = new Board();
-            brd.AddPiece(1, 1);
-            brd.AddPiece(1, 1);
-            brd.AddPiece(1, 1);
-            brd.AddPiece(1, 2);
-            brd.AddPiece(1, 2);
-            brd.AddPiece(1, 3);
+            //GameLoop game = new GameLoop();
 
-            brd.AddPiece(2, 1);
-            brd.AddPiece(2, 2);
-            brd.AddPiece(2, 3);
-            brd.AddPiece(2, 4);
+            Board x = new Board(0, true, new int[6, 7]);
+            x.display();
 
+            //Board y = new Board(x.PieceCount, x.Player1Turn, x.Grid);
+            Board y = new Board(0, true, x.GetGrid());
+            y.AddPiece(1, 1);
 
-
-            brd.display();
-
-            Console.WriteLine("Winner: " + brd.Winner());
-
-
-
+            y.display();
+            x.display();
 
 
             /*

@@ -6,11 +6,14 @@ namespace ConnectFour
 {
     class Board
     {
+        public int PieceCount;
         public bool Player1Turn;
-        public int[,] Grid = new int[6, 7];
-        public Board()
+        public int[,] Grid;
+        public Board(int pieces, bool p1turn, int[,] grid)
         {
-
+            PieceCount = pieces;
+            Player1Turn = p1turn;
+            Grid = grid;
         }
 
         // attempt to add a piece to a column
@@ -23,6 +26,7 @@ namespace ConnectFour
                 if (this.Grid[r, column] == 0)
                 {
                     this.Grid[r, column] = player;
+                    PieceCount++;
                     return true;
                 }
             }
@@ -202,11 +206,23 @@ namespace ConnectFour
             {
                 for (int c = 0; c < 7; c++)
                 {
-                    Console.Write(this.Grid[r, c] + " ");
+                    if (this.Grid[r, c] != 0)
+                    {
+                        Console.Write(this.Grid[r, c] + " ");
+                    }
+                    else
+                    {
+                        Console.Write("- ");
+                    }
                 }
                 Console.Write("\n");
             }
             Console.WriteLine("-------------");
+        }
+
+        public int[,] GetGrid()
+        {
+            return this.Grid;
         }
 
     }

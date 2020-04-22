@@ -7,12 +7,12 @@ namespace ConnectFour
     class Board
     {
         public int PieceCount;
-        public bool Player1Turn;
+        public int Turn;
         public int[,] Grid;
-        public Board(int pieces, bool p1turn, int[,] grid)
+        public Board(int pieces, int turn, int[,] grid)
         {
             PieceCount = pieces;
-            Player1Turn = p1turn;
+            Turn = turn;
             Grid = grid;
         }
 
@@ -27,6 +27,8 @@ namespace ConnectFour
                 {
                     this.Grid[r, column] = player;
                     PieceCount++;
+                    // change turns
+                    Turn = OtherPlayer(Turn);
                     return true;
                 }
             }
@@ -37,6 +39,7 @@ namespace ConnectFour
         // returns 1 if player 1 has won
         // returns 2 if player 2 has won
         // returns 0 if no winner
+                                    // DIAGNOLS CAN STILL BE OPTIMIZED! ADD IN QUIT CHECKS LIKE IN HORIZONTAL AND VERTICAL CHECKS
         public int Winner()
         {
             int lineLength = 0;
@@ -201,6 +204,7 @@ namespace ConnectFour
 
         public void display()
         {
+            //Console.WriteLine(PieceCount + "|" + Player1Turn);
             Console.WriteLine("-------------");
             for (int r = 5; r > -1; r--)
             {
@@ -223,6 +227,16 @@ namespace ConnectFour
         public int[,] GetGrid()
         {
             return this.Grid;
+        }
+
+        // returns a deep copy of the given Board
+        public Board Copy()
+        {
+            int[,] copiedGrid = this.Grid.Clone() as int[,];
+            Board deepcopyBoard = new Board(this.PieceCount,
+                               this.Turn, copiedGrid);
+
+            return deepcopyBoard;
         }
 
     }

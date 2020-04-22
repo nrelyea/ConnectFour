@@ -8,7 +8,7 @@ namespace ConnectFour
     {
         public GameLoop()
         {
-            Board brd = new Board(0, true, new int[6, 7]);
+            Board brd = new Board(0, 1, new int[6, 7]);
 
             while (true)
             {
@@ -26,9 +26,11 @@ namespace ConnectFour
 
                     // DECIDE HOW PLAYER 2 WILL PLAY
 
-                    brd = RandomBot(brd);
+                    //brd = RandomBot(brd);
+                    //brd = EasyBot(brd);
+                    brd = MiniMaxBot(brd);
 
-
+                    Console.Read();
 
 
                     if (brd.Winner() != 0 || brd.PieceCount >= 42) { break; }
@@ -38,9 +40,13 @@ namespace ConnectFour
             Console.Clear();
             brd.display();
 
-            if (brd.Winner() != 0)
+            if (brd.Winner() == 1)
             {
-                Console.WriteLine("Winner: Player " + brd.Winner() + "!");
+                Console.WriteLine("You won! Congratulations!");
+            }
+            else if (brd.Winner() == 2)
+            {
+                Console.WriteLine("You lost! Better luck next time!");
             }
             else
             {
@@ -64,14 +70,90 @@ namespace ConnectFour
             return b;
         }
 
-        // stops immediate lines of 3 if it can
+        // looks for immediate win or loss, and moves to win or prevent loss
         private Board EasyBot(Board b)
         {
-            
-            
-            return b;
+            // see if there is an immediate win available
+            for(int c = 0; c < 7; c++)
+            {
+                Board copy1 = (Board)b.Copy();
+
+                if (copy1.AddPiece(2, c) && copy1.Winner() == 2)
+                {
+                    b.AddPiece(2, c);
+                    return b;
+                }               
+            }
+
+            // see if there is an immediate threat needed to block
+            for (int c = 0; c < 7; c++)
+            {
+                Board copy2 = (Board)b.Copy();
+
+                if (copy2.AddPiece(1, c) && copy2.Winner() == 1)
+                {
+                    b.AddPiece(2, c);
+                    return b;
+                }
+            }
+
+            // otherwise, just pick a random move
+            return RandomBot(b);
         }
 
-       
+        // uses a minimax algorithm to search for a strong move
+        private Board MiniMaxBot(Board b)
+        {
+            Console.WriteLine("Col 1: " + moveStrength(b, 1, 0));
+            Console.WriteLine("Col 2: " + moveStrength(b, 2, 0));
+            Console.WriteLine("Col 3: " + moveStrength(b, 3, 0));
+            Console.WriteLine("Col 4: " + moveStrength(b, 4, 0));
+            Console.WriteLine("Col 5: " + moveStrength(b, 5, 0));
+            Console.WriteLine("Col 6: " + moveStrength(b, 6, 0));
+
+            return EasyBot(b);
+        }
+
+        private int moveStrength(Board b, int move, int depth)
+        {
+            int currentPlayer = b.Turn;
+            Board copy = (Board)b.Copy();
+            if (copy.AddPiece(copy.Turn, move))
+            {
+                // if this move would spell an immediate win for either player
+                int winner = copy.Winner();
+                if(winner != 0)
+                {
+                    // return the id of the current player
+                    return currentPlayer;
+                }
+            }
+            // if the move is illegal, return -1
+            else
+            {
+                return -1;
+            }
+
+            // base case: if depth has hit 0 (and no immediate win after this move established by previous step)
+            if(depth == 0)
+            {
+                return 0;
+            }
+            // otherwise, begin searching further through moves
+            else
+            {
+                for(int c = 0; c < 7; c++)
+                {
+
+                }
+            }
+
+
+
+
+
+            return 0;
+        }
+
     }
 }

@@ -8,12 +8,11 @@ namespace ConnectFour
     {
         public GameLoop()
         {
-            Board brd = new Board(0, 1, new int[6, 7]);
+            Board brd = new Board(0, 1, new int[6, 7], -1);
 
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine("Pieces: " + brd.PieceCount);
                 brd.display();
 
 
@@ -104,12 +103,12 @@ namespace ConnectFour
         // uses a minimax algorithm to search for a strong move
         private Board MiniMaxBot(Board b, int depth)
         {
-            Console.WriteLine("playing for: " + b.Turn);
+            Console.WriteLine("thinking...");
             int tieMove = -1;
             for(int move = 0; move < 7; move++)
             {
                 int strength = moveStrength(b, move, depth);
-                Console.WriteLine("strength of move " + move + ": " + strength);
+                //Console.WriteLine("strength of move " + move + ": " + strength);
                 if (strength != -1)
                 {
                     // if a winning move is available, play that move
@@ -134,8 +133,8 @@ namespace ConnectFour
             // otherwise, move randomly, as a loss is inevitable
             else
             {
-                Console.WriteLine("fuck im gonna lose");
-                Console.Read();
+                //Console.WriteLine("fuck im gonna lose");
+                //Console.Read();
                 return (EasyBot(b));
             }
 
@@ -169,7 +168,7 @@ namespace ConnectFour
                 // if this move would spell an immediate win for either player
                 int winner = copy.Winner();
                 if(winner != 0)
-                {
+                {                                     
                     // return the id of the current player
                     return currentPlayer;
                 }

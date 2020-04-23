@@ -9,11 +9,13 @@ namespace ConnectFour
         public int PieceCount;
         public int Turn;
         public int[,] Grid;
-        public Board(int pieces, int turn, int[,] grid)
+        public int LastMove;
+        public Board(int pieces, int turn, int[,] grid, int last)
         {
             PieceCount = pieces;
             Turn = turn;
             Grid = grid;
+            LastMove = last;
         }
 
         // attempt to add a piece to a column
@@ -27,6 +29,7 @@ namespace ConnectFour
                 {
                     this.Grid[r, column] = player;
                     PieceCount++;
+                    LastMove = column;
                     // change turns
                     Turn = OtherPlayer(Turn);
                     return true;
@@ -205,14 +208,23 @@ namespace ConnectFour
         public void display()
         {
             //Console.WriteLine(PieceCount + "|" + Player1Turn);
+            if(LastMove != -1)
+            {
+                Console.Write("Computer played: " + (LastMove + 1));
+            }
+            Console.WriteLine();
             Console.WriteLine("-------------");
             for (int r = 5; r > -1; r--)
             {
                 for (int c = 0; c < 7; c++)
                 {
-                    if (this.Grid[r, c] != 0)
+                    if (this.Grid[r, c] == 1)
                     {
-                        Console.Write(this.Grid[r, c] + " ");
+                        Console.Write("O ");
+                    }
+                    else if (this.Grid[r, c] == 2)
+                    {
+                        Console.Write("X ");
                     }
                     else
                     {
@@ -222,6 +234,7 @@ namespace ConnectFour
                 Console.Write("\n");
             }
             Console.WriteLine("-------------");
+            Console.WriteLine("1 2 3 4 5 6 7");
         }
 
         public int[,] GetGrid()
@@ -234,7 +247,7 @@ namespace ConnectFour
         {
             int[,] copiedGrid = this.Grid.Clone() as int[,];
             Board deepcopyBoard = new Board(this.PieceCount,
-                               this.Turn, copiedGrid);
+                               this.Turn, copiedGrid, this.LastMove);
 
             return deepcopyBoard;
         }

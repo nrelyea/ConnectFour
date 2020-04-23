@@ -28,9 +28,9 @@ namespace ConnectFour
 
                     //brd = RandomBot(brd);
                     //brd = EasyBot(brd);
-                    brd = MiniMaxBot(brd);
+                    brd = MiniMaxBot(brd, 7);
 
-                    Console.Read();
+                    //Console.Read();
 
 
                     if (brd.Winner() != 0 || brd.PieceCount >= 42) { break; }
@@ -102,20 +102,66 @@ namespace ConnectFour
         }
 
         // uses a minimax algorithm to search for a strong move
-        private Board MiniMaxBot(Board b)
+        private Board MiniMaxBot(Board b, int depth)
         {
-            Console.WriteLine("Col 1: " + moveStrength(b, 1, 0));
-            Console.WriteLine("Col 2: " + moveStrength(b, 2, 0));
-            Console.WriteLine("Col 3: " + moveStrength(b, 3, 0));
-            Console.WriteLine("Col 4: " + moveStrength(b, 4, 0));
-            Console.WriteLine("Col 5: " + moveStrength(b, 5, 0));
-            Console.WriteLine("Col 6: " + moveStrength(b, 6, 0));
+            Console.WriteLine("playing for: " + b.Turn);
+            int tieMove = -1;
+            for(int move = 0; move < 7; move++)
+            {
+                int strength = moveStrength(b, move, depth);
+                Console.WriteLine("strength of move " + move + ": " + strength);
+                if (strength != -1)
+                {
+                    // if a winning move is available, play that move
+                    if(strength == 2)
+                    {
+                        b.AddPiece(2, move);
+                        return (b);
+                    }
+                    else if(strength == 0)
+                    {
+                        tieMove = move;
+                    }
+                }
+            }
+
+            // if a tying move is available, play that move
+            if(tieMove != -1)
+            {
+                b.AddPiece(2, tieMove);
+                return (b);
+            }
+            // otherwise, move randomly, as a loss is inevitable
+            else
+            {
+                Console.WriteLine("fuck im gonna lose");
+                Console.Read();
+                return (EasyBot(b));
+            }
+
+            /*
+            Console.WriteLine("Col 0: " + moveStrength(b, 0, 1));
+            Console.WriteLine("Col 1: " + moveStrength(b, 1, 1));
+            Console.WriteLine("Col 2: " + moveStrength(b, 2, 1));
+            Console.WriteLine("Col 3: " + moveStrength(b, 3, 1));
+            Console.WriteLine("Col 4: " + moveStrength(b, 4, 1));
+            Console.WriteLine("Col 5: " + moveStrength(b, 5, 1));
+            Console.WriteLine("Col 6: " + moveStrength(b, 6, 1));
 
             return EasyBot(b);
+            */
         }
 
         private int moveStrength(Board b, int move, int depth)
         {
+            /*
+            int potentialCurrentWin = b.Winner();
+            if (potentialCurrentWin != 0)
+            {
+                return potentialCurrentWin;
+            }
+            */
+
             int currentPlayer = b.Turn;
             Board copy = (Board)b.Copy();
             if (copy.AddPiece(copy.Turn, move))
@@ -142,9 +188,34 @@ namespace ConnectFour
             // otherwise, begin searching further through moves
             else
             {
+                bool tieAvailable = false;
+
                 for(int c = 0; c < 7; c++)
                 {
+                    int nextMoveStrength = moveStrength(copy, c, depth - 1);
+                    //Console.WriteLine("D: " + depth + " | strength of potential player " + copy.Turn + " move @ column " + c + ": " + nextMoveStrength);
+                    // if the next move will ultimately result in a loss for currentPlayer, mark it as such
+                    if(nextMoveStrength == copy.Turn)
+                    {
+                        //Console.WriteLine("D: " + depth + " | determined: winning for " + copy.Turn);
+                        return copy.Turn;
+                    }
+                    // if at least one of the next moves will continue towards a potential victory for currentPlayer
+                    else if(nextMoveStrength == 0)
+                    {
+                        tieAvailable = true;
+                    }
+                }
 
+                if (tieAvailable)
+                {
+                    //Console.WriteLine("D: " + depth + " | determined: tie");
+                    return 0;
+                }
+                else
+                {
+                    //Console.WriteLine("D: " + depth + " | determined: winning for " + currentPlayer);
+                    return currentPlayer;
                 }
             }
 

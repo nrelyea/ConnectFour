@@ -104,63 +104,48 @@ namespace ConnectFour
         private Board MiniMaxBot(Board b, int depth)
         {
             Console.WriteLine("thinking...");
-            int tieMove = -1;
-            for(int move = 0; move < 7; move++)
+
+            int bestWinningMove = -1;
+            int bestWinningMoveStrength = 0;
+
+            int bestAlternateMove = -1;
+            int bestAlternateMoveStrength = 100;
+
+            for (int move = 0; move < 7; move++)
             {
                 int strength = moveStrength(b, move, depth);
-                //Console.WriteLine("strength of move " + move + ": " + strength);
                 if (strength != -1)
                 {
-                    // if a winning move is available, play that move
-                    if(strength == 2)
+                    //Console.WriteLine("Strength of move " + move + ": " + strength);
+
+                    if((strength / 10) == 2 && strength > bestWinningMoveStrength)
                     {
-                        b.AddPiece(2, move);
-                        return (b);
+                        bestWinningMove = move;
+                        bestWinningMoveStrength = strength;
                     }
-                    else if(strength == 0)
+                    else if (strength == 0 || ((strength / 10) == 1 && strength < bestAlternateMoveStrength))
                     {
-                        tieMove = move;
-                    }
+                        bestAlternateMove = move;
+                        bestAlternateMoveStrength = strength;
+                    }                    
+                    
                 }
             }
 
-            // if a tying move is available, play that move
-            if(tieMove != -1)
+            if(bestWinningMove != -1)   // if there is a winning move to play, play the strongest one
             {
-                b.AddPiece(2, tieMove);
+                b.AddPiece(2, bestWinningMove);
                 return (b);
             }
-            // otherwise, move randomly, as a loss is inevitable
-            else
+            else                        // if there is no winning move, play the optimal alternate one
             {
-                //Console.WriteLine("fuck im gonna lose");
-                //Console.Read();
-                return (EasyBot(b));
+                b.AddPiece(2, bestAlternateMove);
+                return (b);
             }
-
-            /*
-            Console.WriteLine("Col 0: " + moveStrength(b, 0, 1));
-            Console.WriteLine("Col 1: " + moveStrength(b, 1, 1));
-            Console.WriteLine("Col 2: " + moveStrength(b, 2, 1));
-            Console.WriteLine("Col 3: " + moveStrength(b, 3, 1));
-            Console.WriteLine("Col 4: " + moveStrength(b, 4, 1));
-            Console.WriteLine("Col 5: " + moveStrength(b, 5, 1));
-            Console.WriteLine("Col 6: " + moveStrength(b, 6, 1));
-
-            return EasyBot(b);
-            */
         }
 
         private int moveStrength(Board b, int move, int depth)
         {
-            /*
-            int potentialCurrentWin = b.Winner();
-            if (potentialCurrentWin != 0)
-            {
-                return potentialCurrentWin;
-            }
-            */
-
             int currentPlayer = b.Turn;
             Board copy = (Board)b.Copy();
             if (copy.AddPiece(copy.Turn, move))
@@ -168,9 +153,9 @@ namespace ConnectFour
                 // if this move would spell an immediate win for either player
                 int winner = copy.Winner();
                 if(winner != 0)
-                {                                     
-                    // return the id of the current player
-                    return currentPlayer;
+                {
+                    // return the id of the current player * 10, with depth added
+                    return (currentPlayer * 10) + depth;
                 }
             }
             // if the move is illegal, return -1
@@ -188,41 +173,40 @@ namespace ConnectFour
             else
             {
                 bool tieAvailable = false;
+                int strongestMoveStrength = 0;
+                int bestBadMoveStrength = 0;
 
                 for(int c = 0; c < 7; c++)
                 {
                     int nextMoveStrength = moveStrength(copy, c, depth - 1);
-                    //Console.WriteLine("D: " + depth + " | strength of potential player " + copy.Turn + " move @ column " + c + ": " + nextMoveStrength);
                     // if the next move will ultimately result in a loss for currentPlayer, mark it as such
-                    if(nextMoveStrength == copy.Turn)
+                    if((nextMoveStrength / 10) == copy.Turn && nextMoveStrength > strongestMoveStrength)
                     {
-                        //Console.WriteLine("D: " + depth + " | determined: winning for " + copy.Turn);
-                        return copy.Turn;
+                        strongestMoveStrength = nextMoveStrength;
                     }
                     // if at least one of the next moves will continue towards a potential victory for currentPlayer
                     else if(nextMoveStrength == 0)
                     {
                         tieAvailable = true;
                     }
+                    else if(nextMoveStrength > bestBadMoveStrength)
+                    {
+                        bestBadMoveStrength = nextMoveStrength;
+                    }
                 }
-
-                if (tieAvailable)
+                if(strongestMoveStrength > 0)
                 {
-                    //Console.WriteLine("D: " + depth + " | determined: tie");
+                    return strongestMoveStrength;
+                }
+                else if (tieAvailable)
+                {
                     return 0;
                 }
                 else
                 {
-                    //Console.WriteLine("D: " + depth + " | determined: winning for " + currentPlayer);
-                    return currentPlayer;
+                    return bestBadMoveStrength;
                 }
             }
-
-
-
-
-
-            return 0;
         }
 
     }

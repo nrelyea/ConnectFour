@@ -14,6 +14,9 @@ namespace ConnectFour
 
             GameLoop game = new GameLoop();
 
+            //int meme = 19 / 10;
+            //Console.WriteLine(meme);
+
 
             /*
             Application.SetHighDpiMode(HighDpiMode.SystemAware);

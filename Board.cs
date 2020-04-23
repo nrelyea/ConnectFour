@@ -43,6 +43,7 @@ namespace ConnectFour
         // returns 2 if player 2 has won
         // returns 0 if no winner
                                     // DIAGNOLS CAN STILL BE OPTIMIZED! ADD IN QUIT CHECKS LIKE IN HORIZONTAL AND VERTICAL CHECKS
+                                                                            // tried but they were buggy and didnt do much
         public int Winner()
         {
             int lineLength = 0;
@@ -54,7 +55,7 @@ namespace ConnectFour
                 lineLength = 0;
                 for (int c = 0; c < 7; c++)
                 {
-                    // if no win with the length of row remaining, start next row
+                    // if no win possible with the length of row remaining, start next row
                     if (7 - c < 4 - lineLength) { break; }
 
                     // otherwise, continue checking for winner on current row
@@ -81,7 +82,7 @@ namespace ConnectFour
                 lineLength = 0;
                 for (int r = 0; r < 6; r++)
                 {
-                    // if no win with the length of column remaining, start next column
+                    // if no win possible with the length of column remaining, start next column
                     if (6 - r < 4 - lineLength) { break; }
 
                     // otherwise, continue checking for winner on current column
@@ -105,6 +106,7 @@ namespace ConnectFour
             // diagnols from column 1-3 ==> r+, c+
             for (int startC = 1; startC < 4; startC++)
             {
+
                 lineLength = 0;
                 for (int r = 0, c = startC; c < 7; c++, r++)
                 {
@@ -176,7 +178,7 @@ namespace ConnectFour
             {
                 lineLength = 0;
                 for (int c = 0, r = startR; r > -1; c++, r--)
-                {
+                {                    
                     if (this.Grid[r, c] == 0)
                     {
                         lineLength = 0;
@@ -235,11 +237,6 @@ namespace ConnectFour
             }
             Console.WriteLine("-------------");
             Console.WriteLine("1 2 3 4 5 6 7");
-        }
-
-        public int[,] GetGrid()
-        {
-            return this.Grid;
         }
 
         // returns a deep copy of the given Board

@@ -34,10 +34,10 @@ namespace ConnectFour
                     //brd = Random_Bot(brd);
                     //brd = Easy_Bot(brd);
                     //brd = MiniMax_Bot(brd, 6);
-                    brd = FasterMiniMax_Bot(brd, 8);
+                    brd = FasterMiniMax_Bot(brd, 7);
                     //brd = BetterMiniMax_Bot(brd);
 
-                    Console.Read();
+                    //Console.Read();
 
 
                     if (brd.Winner() != 0 || brd.PieceCount >= 42) { break; }
@@ -117,7 +117,7 @@ namespace ConnectFour
             int bestWinningMoveStrength = 0;
 
             int bestAlternateMove = -1;
-            int bestAlternateMoveStrength = 100;
+            int bestAlternateMoveStrength = 1000;
 
             for (int move = 0; move < 7; move++)
             {
@@ -126,12 +126,12 @@ namespace ConnectFour
                 {
                     Console.WriteLine("Strength of move " + move + ": " + strength);
 
-                    if((strength / 10) == 2 && strength > bestWinningMoveStrength)
+                    if((strength / 100) == 2 && strength > bestWinningMoveStrength)
                     {
                         bestWinningMove = move;
                         bestWinningMoveStrength = strength;
                     }
-                    else if (strength == 0 || ((strength / 10) == 1 && strength < bestAlternateMoveStrength))
+                    else if (strength == 0 || ((strength / 100) == 1 && strength < bestAlternateMoveStrength))
                     {
                         bestAlternateMove = move;
                         bestAlternateMoveStrength = strength;
@@ -159,13 +159,17 @@ namespace ConnectFour
         {
             Array.Fill(strengths, -1);
 
-            Console.WriteLine("thinking...");
+            Console.WriteLine("\nthinking...\n");
 
             int bestWinningMove = -1;
             int bestWinningMoveStrength = 0;
 
             int bestAlternateMove = -1;
-            int bestAlternateMoveStrength = 100;
+            int bestAlternateMoveStrength = 1000;
+
+            depth += (7 - b.ValidMoveCount());
+
+            Console.WriteLine("Searching at depth " + depth + "...");
 
             List<Thread> threads = new List<Thread>();
             for (int i = 0; i < 7; i++)
@@ -187,12 +191,12 @@ namespace ConnectFour
                 {
                     Console.WriteLine("Strength of move " + move + ": " + strengths[move]);
 
-                    if ((strengths[move] / 10) == 2 && strengths[move] > bestWinningMoveStrength)
+                    if ((strengths[move] / 100) == 2 && strengths[move] > bestWinningMoveStrength)
                     {
                         bestWinningMove = move;
                         bestWinningMoveStrength = strengths[move];
                     }
-                    else if (strengths[move] == 0 || ((strengths[move] / 10) == 1 && strengths[move] < bestAlternateMoveStrength))
+                    else if (strengths[move] == 0 || ((strengths[move] / 100) == 1 && strengths[move] < bestAlternateMoveStrength))
                     {
                         bestAlternateMove = move;
                         bestAlternateMoveStrength = strengths[move];
@@ -224,7 +228,7 @@ namespace ConnectFour
             int bestWinningMoveStrength = 0;
 
             int bestAlternateMove = -1;
-            int bestAlternateMoveStrength = 100;
+            int bestAlternateMoveStrength = 1000;
 
             List<int> tieMoves = new List<int> { };
 
@@ -236,12 +240,12 @@ namespace ConnectFour
                 {
                     //Console.WriteLine("Strength of move " + move + ": " + strength);
 
-                    if ((strength / 10) == 2 && strength > bestWinningMoveStrength)
+                    if ((strength / 100) == 2 && strength > bestWinningMoveStrength)
                     {
                         bestWinningMove = move;
                         bestWinningMoveStrength = strength;
                     }
-                    else if (strength == 0 || ((strength / 10) == 1 && strength < bestAlternateMoveStrength))
+                    else if (strength == 0 || ((strength / 100) == 1 && strength < bestAlternateMoveStrength))
                     {
                         bestAlternateMove = move;
                         bestAlternateMoveStrength = strength;
@@ -315,7 +319,7 @@ namespace ConnectFour
                 if(winner != 0)
                 {
                     // return the id of the current player * 10, with depth added
-                    return (currentPlayer * 10) + depth;
+                    return (currentPlayer * 100) + depth;
                     //return (currentPlayer * 10);
                 }
             }
@@ -341,7 +345,7 @@ namespace ConnectFour
                 {
                     int nextMoveStrength = moveStrength(copy, c, depth - 1);
                     // if the next move will ultimately result in a loss for currentPlayer, mark it as such
-                    if((nextMoveStrength / 10) == copy.Turn && nextMoveStrength > strongestMoveStrength)
+                    if((nextMoveStrength / 100) == copy.Turn && nextMoveStrength > strongestMoveStrength)
                     {
                         strongestMoveStrength = nextMoveStrength;
                     }

@@ -249,5 +249,20 @@ namespace ConnectFour
             return deepcopyBoard;
         }
 
+        public int ValidMoveCount()
+        {
+            int count = 7;
+            
+            for(int c = 0; c < 7; c++)
+            {
+                if(Grid[5,c] != 0)
+                {
+                    count--;
+                }
+            }
+
+            return count;
+        }
+
     }
 }

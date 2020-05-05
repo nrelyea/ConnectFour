@@ -25,11 +25,13 @@ namespace ConnectFour
 
                     // DECIDE HOW PLAYER 2 WILL PLAY
 
-                    //brd = RandomBot(brd);
-                    //brd = EasyBot(brd);
-                    brd = MiniMaxBot(brd, 7);
+                    //brd = Random_Bot(brd);
+                    //brd = Easy_Bot(brd);
+                    //brd = MiniMax_Bot(brd, 6);
+                    brd = FasterMiniMax_Bot(brd, 6);
+                    //brd = BetterMiniMax_Bot(brd);
 
-                    //Console.Read();
+                    Console.Read();
 
 
                     if (brd.Winner() != 0 || brd.PieceCount >= 42) { break; }
@@ -55,7 +57,7 @@ namespace ConnectFour
         }
 
         // plays randomly
-        private Board RandomBot(Board b)
+        private Board Random_Bot(Board b)
         {
             while (true)
             {
@@ -70,7 +72,7 @@ namespace ConnectFour
         }
 
         // looks for immediate win or loss, and moves to win or prevent loss
-        private Board EasyBot(Board b)
+        private Board Easy_Bot(Board b)
         {
             // see if there is an immediate win available
             for(int c = 0; c < 7; c++)
@@ -97,11 +99,11 @@ namespace ConnectFour
             }
 
             // otherwise, just pick a random move
-            return RandomBot(b);
+            return Random_Bot(b);
         }
 
-        // uses a minimax algorithm to search for a strong move
-        private Board MiniMaxBot(Board b, int depth)
+        // uses a minimax algorithm to search for the strongest move
+        private Board MiniMax_Bot(Board b, int depth)
         {
             Console.WriteLine("thinking...");
 
@@ -116,7 +118,7 @@ namespace ConnectFour
                 int strength = moveStrength(b, move, depth);
                 if (strength != -1)
                 {
-                    //Console.WriteLine("Strength of move " + move + ": " + strength);
+                    Console.WriteLine("Strength of move " + move + ": " + strength);
 
                     if((strength / 10) == 2 && strength > bestWinningMoveStrength)
                     {
@@ -134,16 +136,153 @@ namespace ConnectFour
 
             if(bestWinningMove != -1)   // if there is a winning move to play, play the strongest one
             {
+                //Console.WriteLine("\npursuing winning move: " + bestWinningMove);
                 b.AddPiece(2, bestWinningMove);
                 return (b);
             }
             else                        // if there is no winning move, play the optimal alternate one
             {
+                //Console.WriteLine("\npursuing optimal alternate move: " + bestAlternateMove + " (strength " + bestAlternateMoveStrength + ")");
                 b.AddPiece(2, bestAlternateMove);
                 return (b);
             }
         }
 
+        // Same minimax algorithm but optimized with multithreading
+        private Board FasterMiniMax_Bot(Board b, int depth)
+        {
+            Console.WriteLine("thinking...");
+
+            int bestWinningMove = -1;
+            int bestWinningMoveStrength = 0;
+
+            int bestAlternateMove = -1;
+            int bestAlternateMoveStrength = 100;
+
+            for (int move = 0; move < 7; move++)
+            {
+                int strength = moveStrength(b, move, depth);
+                if (strength != -1)
+                {
+                    Console.WriteLine("Strength of move " + move + ": " + strength);
+
+                    if ((strength / 10) == 2 && strength > bestWinningMoveStrength)
+                    {
+                        bestWinningMove = move;
+                        bestWinningMoveStrength = strength;
+                    }
+                    else if (strength == 0 || ((strength / 10) == 1 && strength < bestAlternateMoveStrength))
+                    {
+                        bestAlternateMove = move;
+                        bestAlternateMoveStrength = strength;
+                    }
+
+                }
+            }
+
+            if (bestWinningMove != -1)   // if there is a winning move to play, play the strongest one
+            {
+                //Console.WriteLine("\npursuing winning move: " + bestWinningMove);
+                b.AddPiece(2, bestWinningMove);
+                return (b);
+            }
+            else                        // if there is no winning move, play the optimal alternate one
+            {
+                //Console.WriteLine("\npursuing optimal alternate move: " + bestAlternateMove + " (strength " + bestAlternateMoveStrength + ")");
+                b.AddPiece(2, bestAlternateMove);
+                return (b);
+            }
+        }
+
+        // uses a more intuitive approach in combination with minimax algorithm to search for the strongest move
+        private Board BetterMiniMax_Bot(Board b)
+        {
+            Console.WriteLine("thinking...");
+
+            int bestWinningMove = -1;
+            int bestWinningMoveStrength = 0;
+
+            int bestAlternateMove = -1;
+            int bestAlternateMoveStrength = 100;
+
+            List<int> tieMoves = new List<int> { };
+
+            for (int move = 0; move < 7; move++)
+            {
+                // hardcoded depth of 6 move lookahead
+                int strength = moveStrength(b, move, 6);
+                if (strength != -1)
+                {
+                    //Console.WriteLine("Strength of move " + move + ": " + strength);
+
+                    if ((strength / 10) == 2 && strength > bestWinningMoveStrength)
+                    {
+                        bestWinningMove = move;
+                        bestWinningMoveStrength = strength;
+                    }
+                    else if (strength == 0 || ((strength / 10) == 1 && strength < bestAlternateMoveStrength))
+                    {
+                        bestAlternateMove = move;
+                        bestAlternateMoveStrength = strength;
+                        if(strength == 0)
+                        {
+                            tieMoves.Add(move);
+                        }
+                    }
+
+                }
+            }
+
+            if (bestWinningMove != -1)   // if there is a winning move to play, play the strongest one
+            {
+                Console.WriteLine("Pursuing CPU win");
+                b.AddPiece(2, bestWinningMove);
+                return (b);
+            }
+            else if (bestAlternateMoveStrength > 0)    // if all moves are losing, play the optimal LEAST WEAK move
+            {
+                Console.WriteLine("Pursuing optimal losing move");
+                b.AddPiece(2, bestAlternateMove);
+                return (b);
+            }
+
+
+            ////////////////////////////////////////////////////////////////////////////////
+            // ----- Otherwise, some moves suggest tie, so play more intuitively... ----- //
+            ////////////////////////////////////////////////////////////////////////////////
+
+
+            Console.WriteLine("moves to consider:");
+            printIntList(tieMoves);
+
+            // if only one move is not losing, play it
+            if(tieMoves.Count == 1)
+            {
+                b.AddPiece(2, tieMoves[0]);
+                return (b);
+            }
+
+            // Otherwise, determine which of tying moves is optimal
+
+            // ideal columns to have pieces in, ordered from most ideal to least ideal
+            int[] idealColumns = { 3, 2, 4, 1, 5, 0, 6 };
+
+            for(int i = 0; i < idealColumns.Length; i++)
+            {
+                if (tieMoves.Contains(idealColumns[i]))
+                {
+                    
+
+
+                }
+            }
+
+            // placeholder, just play first available tie move
+            b.AddPiece(2, tieMoves[0]);
+            return (b);
+        }
+        
+        // helper for minimax alg, recursively determines move strength
         private int moveStrength(Board b, int move, int depth)
         {
             int currentPlayer = b.Turn;
@@ -156,6 +295,7 @@ namespace ConnectFour
                 {
                     // return the id of the current player * 10, with depth added
                     return (currentPlayer * 10) + depth;
+                    //return (currentPlayer * 10);
                 }
             }
             // if the move is illegal, return -1
@@ -209,5 +349,18 @@ namespace ConnectFour
             }
         }
 
+        private void printIntList(List<int> lst)
+        {
+            Console.Write("[");
+            for(int i = 0; i < lst.Count; i++)
+            {
+                if(i != 0)
+                {
+                    Console.Write(",");
+                }
+                Console.Write(" " + lst[i]);
+            }
+            Console.WriteLine(" ]");
+        }
     }
 }

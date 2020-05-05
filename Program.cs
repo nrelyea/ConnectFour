@@ -1,29 +1,61 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ConnectFour
 {
-    static class Program
+    class Program
     {
+
         [STAThread]
         static void Main()
         {
 
-            GameLoop game = new GameLoop();
+            //GameLoop game = new GameLoop();
 
-            //int meme = 19 / 10;
-            //Console.WriteLine(meme);
+            Tests test = new Tests();
 
 
-            /*
-            Application.SetHighDpiMode(HighDpiMode.SystemAware);
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
-            */
+
+        }
+
+
+        static void HashTableEx()
+        {
+            
+            Hashtable ht = new Hashtable();
+
+            int meme = 9;
+            string msg = "ayy lmao";
+            List<int> lst = new List<int> { 11, 22, 33, 44 };
+
+            ht.Add("first", meme);
+            ht.Add("second", msg);
+            ht.Add("third", lst);
+
+            try
+            {
+                ht.Add("first", "hehe");
+            }
+            catch
+            {
+                var retrieved = ht["third"];
+
+                if(retrieved is int || retrieved is string)
+                {
+                    Console.WriteLine(retrieved);
+                }
+                else
+                {
+                    Console.WriteLine(retrieved + " " + ((List<int>)retrieved)[0]);
+                }
+            }
+            
         }
     }
 

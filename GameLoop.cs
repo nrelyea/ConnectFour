@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace ConnectFour
 {
     class GameLoop
     {
+        // public variable to be used by FasterMiniMaxBot+
+        int[] strengths;
         public GameLoop()
         {
+            strengths = new int[7];
+            Array.Fill(strengths, -1);
+
             Board brd = new Board(0, 1, new int[6, 7], -1);
 
             while (true)
@@ -28,7 +34,7 @@ namespace ConnectFour
                     //brd = Random_Bot(brd);
                     //brd = Easy_Bot(brd);
                     //brd = MiniMax_Bot(brd, 6);
-                    brd = FasterMiniMax_Bot(brd, 6);
+                    brd = FasterMiniMax_Bot(brd, 8);
                     //brd = BetterMiniMax_Bot(brd);
 
                     Console.Read();
@@ -151,6 +157,8 @@ namespace ConnectFour
         // Same minimax algorithm but optimized with multithreading
         private Board FasterMiniMax_Bot(Board b, int depth)
         {
+            Array.Fill(strengths, -1);
+
             Console.WriteLine("thinking...");
 
             int bestWinningMove = -1;
@@ -159,22 +167,35 @@ namespace ConnectFour
             int bestAlternateMove = -1;
             int bestAlternateMoveStrength = 100;
 
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < 7; i++)
+            {
+                Thread t = new Thread(new ParameterizedThreadStart(MeasureStrength));
+                MoveData data = new MoveData(b, i, depth);
+                t.Start(data);
+                threads.Add(t);
+            }
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
+
             for (int move = 0; move < 7; move++)
             {
-                int strength = moveStrength(b, move, depth);
-                if (strength != -1)
+                //int strength = moveStrength(b, move, depth);
+                if (strengths[move] != -1)
                 {
-                    Console.WriteLine("Strength of move " + move + ": " + strength);
+                    Console.WriteLine("Strength of move " + move + ": " + strengths[move]);
 
-                    if ((strength / 10) == 2 && strength > bestWinningMoveStrength)
+                    if ((strengths[move] / 10) == 2 && strengths[move] > bestWinningMoveStrength)
                     {
                         bestWinningMove = move;
-                        bestWinningMoveStrength = strength;
+                        bestWinningMoveStrength = strengths[move];
                     }
-                    else if (strength == 0 || ((strength / 10) == 1 && strength < bestAlternateMoveStrength))
+                    else if (strengths[move] == 0 || ((strengths[move] / 10) == 1 && strengths[move] < bestAlternateMoveStrength))
                     {
                         bestAlternateMove = move;
-                        bestAlternateMoveStrength = strength;
+                        bestAlternateMoveStrength = strengths[move];
                     }
 
                 }
@@ -349,6 +370,14 @@ namespace ConnectFour
             }
         }
 
+        private void MeasureStrength(object md)
+        {
+            MoveData data = (MoveData)md;
+
+            strengths[data.Move] = moveStrength(data.Board, data.Move, data.Depth);
+
+        }
+
         private void printIntList(List<int> lst)
         {
             Console.Write("[");
@@ -361,6 +390,20 @@ namespace ConnectFour
                 Console.Write(" " + lst[i]);
             }
             Console.WriteLine(" ]");
+        }
+    }
+
+    class MoveData
+    {
+        public Board Board;
+        public int Move;
+        public int Depth;
+
+        public MoveData(Board b, int m, int d)
+        {
+            Board = b;
+            Move = m;
+            Depth = d;
         }
     }
 }

@@ -16,9 +16,9 @@ namespace ConnectFour
         static void Main()
         {
 
-            //GameLoop game = new GameLoop();
+            GameLoop game = new GameLoop();
 
-            Tests test = new Tests();
+            //Tests test = new Tests();
 
 
 

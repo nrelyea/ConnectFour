@@ -22,8 +22,6 @@ namespace ConnectFour
             List<Thread> threads = new List<Thread>();
             for (int i = 0; i < 7; i++)
             {
-                //Thread t = new Thread(new ParameterizedThreadStart(Sleepy));
-                //t.Start("thread " + i);
                 Thread t = new Thread(new ParameterizedThreadStart(Sleepy));
                 t.Start(i);
                 threads.Add(t);
